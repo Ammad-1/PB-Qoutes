@@ -106,7 +106,8 @@ export default function QuoteBuilder() {
         product_id: l.product_id ? Number(l.product_id) : null,
         print_method_id: l.print_method_id ? Number(l.print_method_id) : null,
         quantity: Number(l.quantity),
-        product_unit_cost: Number(l.manual_unit_price)
+        pricing_mode: 'manual_unit',
+        manual_unit_price: Number(l.manual_unit_price)
       }))
     }
 

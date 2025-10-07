@@ -1,6 +1,16 @@
 # Overview
 
-Printberry Quote App is a full-stack quoting and inventory management system for a printing business. The application allows users to manage customers, products, suppliers, print methods, and generate detailed quotes with PDF export functionality. It handles complex pricing calculations including tiered pricing, markup percentages, VAT, and delivery costs.
+Printberry Quote App is a full-stack quoting and inventory management system for a printing business. The application allows users to manage customers, products, suppliers, print methods, and generate detailed quotes with PDF export functionality. It features a simplified quote builder interface for easy data entry and professional PDF generation with direct download capability.
+
+## Recent Changes (October 2025)
+
+- **Simplified Quote Builder**: Streamlined interface with essential fields only (product, print method, quantity, unit price, description)
+- **Manual Entry Support**: Users can enter custom product names and print methods without selecting from dropdowns
+- **PDF Download**: Clients can download quote PDFs directly to their computer from the History page
+- **Professional PDF Layout**: Modern design with blue header, alternating row colors, and clear sections
+- **Express v5 Compatibility**: Fixed wildcard route syntax for production deployment ('/*splat')
+- **Database Migration**: Made product_id and print_method_id nullable to support manual entry
+- **Fixed Pricing Mode**: Corrected manual_unit pricing mode to prevent 500 errors when using manual entries
 
 # User Preferences
 
