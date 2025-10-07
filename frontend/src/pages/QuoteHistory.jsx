@@ -27,9 +27,18 @@ export default function QuoteHistory() {
     URL.revokeObjectURL(url)
   }
 
-  const generatePdf = async (id) => {
-    await axios.get(`/api/pdf/quote/${id}`)
-    alert('PDF saved to Quotes folder')
+  const downloadPdf = async (id, quoteNumber) => {
+    try {
+      const res = await axios.get(`/api/pdf/quote/${id}/download`, { responseType: 'blob' })
+      const url = URL.createObjectURL(res.data)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${quoteNumber}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      alert('Error downloading PDF: ' + (err.response?.data?.error || err.message))
+    }
   }
 
   const cloneQuote = async (id) => {
@@ -86,8 +95,8 @@ export default function QuoteHistory() {
                 <td className="p-2">{q.status}</td>
                 <td className="p-2 text-right">£{Number(q.total).toFixed(2)}</td>
                 <td className="p-2 text-right space-x-2">
-                  <button className="text-blue-700" onClick={() => generatePdf(q.id)}>PDF</button>
-                  <button className="text-green-700" onClick={() => cloneQuote(q.id)}>Clone</button>
+                  <button className="text-blue-700 hover:underline" onClick={() => downloadPdf(q.id, q.quote_number)}>Download PDF</button>
+                  <button className="text-green-700 hover:underline" onClick={() => cloneQuote(q.id)}>Clone</button>
                   <button className="text-red-700" onClick={async () => { if (confirm('Delete this quote?')) { await axios.delete(`/api/quotes/${q.id}`); load() } }}>Delete</button>
                   <select className="border rounded px-1 py-0.5" value={q.status} onChange={e => updateStatus(q.id, e.target.value)}>
                     <option>Pending</option>
