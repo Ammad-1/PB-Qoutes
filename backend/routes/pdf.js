@@ -10,8 +10,8 @@ router.get('/quote/:id/download', (req, res) => {
     req.db.all(
       `SELECT l.*, p.name as product_name, pm.name as print_method_name, s.supplier_name
        FROM quote_lines l 
-       JOIN products p ON p.id=l.product_id
-       JOIN print_methods pm ON pm.id=l.print_method_id
+       LEFT JOIN products p ON p.id=l.product_id
+       LEFT JOIN print_methods pm ON pm.id=l.print_method_id
        LEFT JOIN suppliers s ON s.id=l.supplier_id
        WHERE l.quote_id=?`,
       [id],

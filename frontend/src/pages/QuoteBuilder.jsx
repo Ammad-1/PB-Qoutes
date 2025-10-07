@@ -71,17 +71,29 @@ export default function QuoteBuilder() {
       return
     }
 
-    const validLines = lines.filter(l => {
+    for (let i = 0; i < lines.length; i++) {
+      const l = lines[i]
       const hasProduct = l.product_id || l.manual_product_name
       const hasPrint = l.print_method_id || l.manual_print_method_name
       const hasQty = l.quantity && Number(l.quantity) > 0
       const hasPrice = l.manual_unit_price && Number(l.manual_unit_price) > 0
-      return hasProduct && hasPrint && hasQty && hasPrice
-    })
-
-    if (validLines.length === 0) {
-      setError('Please ensure all items have product, print method, quantity, and unit price')
-      return
+      
+      if (!hasProduct) {
+        setError(`Item ${i + 1}: Please select a product or enter a product name`)
+        return
+      }
+      if (!hasPrint) {
+        setError(`Item ${i + 1}: Please select a print method or enter a method name`)
+        return
+      }
+      if (!hasQty) {
+        setError(`Item ${i + 1}: Please enter a valid quantity (greater than 0)`)
+        return
+      }
+      if (!hasPrice) {
+        setError(`Item ${i + 1}: Please enter a unit price`)
+        return
+      }
     }
 
     const payload = {
@@ -89,7 +101,7 @@ export default function QuoteBuilder() {
       notes,
       terms,
       hide_supplier_in_pdf: true,
-      lines: validLines.map(l => ({
+      lines: lines.map(l => ({
         ...l,
         product_id: l.product_id ? Number(l.product_id) : null,
         print_method_id: l.print_method_id ? Number(l.print_method_id) : null,

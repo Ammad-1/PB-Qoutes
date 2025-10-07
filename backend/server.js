@@ -65,6 +65,48 @@ async function migrateAndStart() {
   ];
   await Promise.all(tasks);
 
+  await new Promise((resolve) => {
+    db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='quote_lines_new'", [], (err, row) => {
+      if (!row) {
+        db.serialize(() => {
+          db.run(`CREATE TABLE quote_lines_new (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            quote_id INTEGER NOT NULL,
+            product_id INTEGER,
+            supplier_id INTEGER,
+            print_method_id INTEGER,
+            colours INTEGER DEFAULT 0,
+            quantity INTEGER NOT NULL,
+            product_unit_cost REAL NOT NULL,
+            print_cost_total REAL NOT NULL,
+            line_total_cost REAL NOT NULL,
+            selling_price REAL NOT NULL,
+            pricing_mode TEXT DEFAULT "auto",
+            manual_unit_price REAL,
+            manual_total REAL,
+            line_description TEXT,
+            manual_product_name TEXT,
+            manual_print_method_name TEXT,
+            pack_size INTEGER,
+            delivery_per_pack REAL,
+            delivery_flat REAL,
+            FOREIGN KEY (quote_id) REFERENCES quotes(id) ON DELETE CASCADE,
+            FOREIGN KEY (product_id) REFERENCES products(id),
+            FOREIGN KEY (supplier_id) REFERENCES suppliers(id),
+            FOREIGN KEY (print_method_id) REFERENCES print_methods(id)
+          )`);
+          
+          db.run(`INSERT INTO quote_lines_new SELECT * FROM quote_lines`, () => {
+            db.run(`DROP TABLE quote_lines`);
+            db.run(`ALTER TABLE quote_lines_new RENAME TO quote_lines`, () => resolve());
+          });
+        });
+      } else {
+        resolve();
+      }
+    });
+  });
+
   app.listen(PORT, () => {
     console.log(`Backend listening on http://localhost:${PORT}`);
   });
