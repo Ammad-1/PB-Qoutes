@@ -9,7 +9,7 @@ const xlsx = require('node-xlsx');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || (process.env.NODE_ENV === 'production' ? 5000 : 5001);
 const DB_PATH = path.join(__dirname, 'db', 'printberry.sqlite');
 const QUOTES_DIR = path.join(__dirname, '..', 'Quotes');
 
@@ -89,6 +89,15 @@ app.use('/api/settings', require('./routes/settings'));
 app.get('/api/health', (req, res) => {
   res.json({ ok: true });
 });
+
+// Serve static files from frontend build in production
+const FRONTEND_DIST = path.join(__dirname, '..', 'frontend', 'dist');
+if (fs.existsSync(FRONTEND_DIST)) {
+  app.use(express.static(FRONTEND_DIST));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(FRONTEND_DIST, 'index.html'));
+  });
+}
 
 // Start after migrations complete
 migrateAndStart();
