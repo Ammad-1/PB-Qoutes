@@ -86,9 +86,32 @@ router.post('/clone/:id', async (req, res) => {
           req.db.all('SELECT * FROM quote_lines WHERE quote_id=?', [id], (err3, lines) => {
             if (err3) return res.status(500).json({ error: err3.message });
             const stmt = req.db.prepare(
-              'INSERT INTO quote_lines (quote_id, product_id, supplier_id, print_method_id, colours, quantity, product_unit_cost, print_cost_total, line_total_cost, selling_price) VALUES (?,?,?,?,?,?,?,?,?,?)'
+              'INSERT INTO quote_lines (quote_id, product_id, supplier_id, print_method_id, colours, quantity, product_unit_cost, print_cost_total, line_total_cost, selling_price, pricing_mode, manual_unit_price, pack_size, delivery_per_pack, delivery_flat, manual_total, line_description, manual_product_name, manual_print_method_name) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
             );
-            lines.forEach(l => stmt.run([newId, l.product_id, l.supplier_id, l.print_method_id, l.colours, l.quantity, l.product_unit_cost, l.print_cost_total, l.line_total_cost, l.selling_price]));
+            const numberOrNull = (value) => (value === '' || value == null ? null : Number(value));
+            const textOrNull = (value) => (value == null || value === '' ? null : String(value));
+
+            lines.forEach(l => stmt.run([
+              newId,
+              numberOrNull(l.product_id),
+              numberOrNull(l.supplier_id),
+              numberOrNull(l.print_method_id),
+              Number(l.colours || 0),
+              Number(l.quantity),
+              Number(l.product_unit_cost || 0),
+              Number(l.print_cost_total || 0),
+              Number(l.line_total_cost || 0),
+              Number(l.selling_price || 0),
+              l.pricing_mode || 'auto',
+              numberOrNull(l.manual_unit_price),
+              numberOrNull(l.pack_size),
+              numberOrNull(l.delivery_per_pack),
+              numberOrNull(l.delivery_flat),
+              numberOrNull(l.manual_total),
+              textOrNull(l.line_description),
+              textOrNull(l.manual_product_name),
+              textOrNull(l.manual_print_method_name),
+            ]));
             stmt.finalize(() => res.json({ id: newId, quote_number: newQuoteNumber }));
           });
         }
